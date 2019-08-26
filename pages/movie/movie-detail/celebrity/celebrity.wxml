@@ -1,0 +1,35 @@
+<!--pages/movie/movie-detail/celebrity/celebrity.wxml-->
+<import src="/pages/movie/movie-grid/movie-grid-template.wxml" />
+<view class="container">
+    <view class="session-poster session-poster-spacing">
+        <image class="poster" src="{{avatar}}" bindtap="bindPoster" data-poster-url="{{avatar}}"></image>
+    </view>
+    <view class="summary-session">
+        <view class="celebrity-summary">
+            <text class="name">{{celebrity.name}}</text>
+            <text class="country">出生地：{{celebrity.bornPlace}}</text>
+            <text class="role">星座：{{celebrity.constellation}}</text>
+            <text class="birth">{{celebrity.birthday}}</text>
+        </view>
+        <text class="fans">{{celebrity.id}}粉丝</text>
+    </view>
+    <view class="desc-session">
+        <text class="title">简介</text>
+        <view class="desc-wrapper">
+            <text class="desc-content {{showAllDesc ? 'desc-content-auto' : 'desc-content-3line'}}">{{celebrity.summary}}</text>
+            <block wx:if="{{!showAllDesc}}">
+                <text class="extension" bindtap="handleExtensiontap">展开</text>
+            </block>
+        </view>
+    </view>
+    <view class="works-session">
+        <text class="title">代表作品</text>
+        <view class="works-session-content">
+            <scroll-view class="works-scroll" scroll-x="true">
+                <block wx:for="{{celebrity.movie}}" wx:key="index" wx:for-item="item">
+                    <template is="movie-grid-template" data="{{...item}}" />
+                </block>
+            </scroll-view>
+        </view>
+    </view>
+</view>

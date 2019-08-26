@@ -1,0 +1,73 @@
+@import "/pages/movie/movie-rating/movie-rating-template.wxss";
+
+.movie-wrapper {
+    padding: 30rpx;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+.movie-wrapper:last-child {
+    border-bottom: 0px solid #e6e6e6;
+}
+
+.movie-content {
+    display: flex;
+    flex-direction: row;
+} 
+
+.movie-content .poster {
+    display: inline-block;
+    width: 160rpx;
+    height: 236rpx;
+}
+
+.poster-wrapper {
+    width: 160rpx;
+    height: 236rpx;
+}
+
+.movie-content .movie-summary {
+    width: 550rpx;
+    display: flex;
+    flex-direction: column; 
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+}
+
+.movie-content .name {
+    color: #4a4a4a;
+    font-size: 32rpx;
+    margin-bottom:7px;
+    word-break: keep-all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-weight:500;
+}
+
+.movie-content .directors, .casts, .genres, .wish-count {
+    font-size: 24rpx;
+    color: #777;
+    line-height: 1.6;
+    word-break: keep-all;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.genres {
+    margin-bottom: 6rpx;
+}
+
+.movie-content .wish-btn, .ticket-btn {
+    width: 90rpx;
+    height: 50rpx;
+    color: #de9703;
+    font-size: 28rpx;
+    align-self: center;
+    line-height: 50rpx;
+    text-align: center;
+    border-radius: 6rpx;
+    border-width: 3rpx;
+    border-style: solid;
+    display:none;
+}

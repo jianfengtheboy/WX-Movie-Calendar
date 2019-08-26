@@ -1,39 +1,67 @@
 //app.js
 App({
+  //全局数据，中文日期，供转换用
+  chineseDate: {
+    years: ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'],
+    months: ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二']
+  },
+  calendarData:{
+    '2019-8-26': {
+      "chineseDate": '九月廿七',
+      "title": '试图刺杀希特勒的克劳斯·冯·施道芬堡',
+      "time": '（1907.11.15-1944.7.20）',
+      "comment": '现在我知道还可以做些什么来效忠德国，如果只顾自己，我就是叛国者',
+      "from": '',
+      "movie": '行动目标希特勒',
+      "average": '7.0',
+      "stars": 3.5
+    }
+  },
   onLaunch: function () {
-    // 展示本地存储能力
+    //调用API从本地缓存中获取数据
     var logs = wx.getStorageSync('logs') || []
     logs.unshift(Date.now())
     wx.setStorageSync('logs', logs)
-
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
-    // 获取用户信息
-    wx.getSetting({
-      success: res => {
-        if (res.authSetting['scope.userInfo']) {
-          // 已经授权，可以直接调用 getUserInfo 获取头像昵称，不会弹框
-          wx.getUserInfo({
-            success: res => {
-              // 可以将 res 发送给后台解码出 unionId
-              this.globalData.userInfo = res.userInfo
-
-              // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-              // 所以此处加入 callback 以防止这种情况
-              if (this.userInfoReadyCallback) {
-                this.userInfoReadyCallback(res)
-              }
-            }
-          })
-        }
+    let that = this
+    // 使用设备可视宽高
+    wx.getSystemInfo({
+      success: function (res) {
+        that.globalData.windowWidth = res.windowWidth
+        that.globalData.windowHeight = res.windowHeight
       }
     })
   },
+  getUserInfo:function(cb){
+    var that = this
+    if(this.globalData.userInfo){
+      typeof cb == "function" && cb(this.globalData.userInfo)
+    }else{
+      //调用登录接口
+      wx.login({
+        success: function () {
+          wx.getUserInfo({
+            success: res => {
+              that.globalData.userInfo = res.userInfo
+              typeof cb == "function" && cb(that.globalData.userInfo)
+            }
+          })
+        }
+      })
+    }
+  },
   globalData: {
-    userInfo: null
+    userInfo: null,
+    windowWidth: 0,
+    windowHeight: 0,
+    doubanBase: "https://douban.uieee.com",
+    inTheaters: "/v2/movie/in_theaters",
+    comingSoon: "/v2/movie/coming_soon",
+    top250: "/v2/movie/top250",
+    weekly: "/v2/movie/weekly",
+    usBox: "/v2/movie/us_box",
+    newMovies: "/v2/movie/new_movies",
+    subject: "/v2/movie/subject/",
+    celebrity: "/v2/movie/celebrity/",
+    search: "/v2/movie/search?q="
   }
 })

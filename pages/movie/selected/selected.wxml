@@ -1,0 +1,28 @@
+<!--pages/movie/selected/selected.wxml-->
+<import src="/pages/movie/movie-rating/movie-rating-template.wxml" />
+<view class="container">
+    <view class="session-selected">
+        <scroll-view style="height:{{windowHeight}}px" scroll-y="true" bindscrolltolower="handleLower" bindscrolltoupper="handleUpper">
+            <block wx:for="{{movies}}" wx:for-index="index" wx:key="index" wx:for-item="item">
+                <view class="selected-wrapper" bindtap="bindMovieDetail" data-id="{{item.id}}">
+                    <view class="selected-header selected-header-spacing">
+                        <text class="selected-index">{{index + 1}}</text>
+                    </view>
+                    <view class="selected-movie-content selected-movie-content">
+                        <image class="poster" src="{{item.images.medium}}"></image>
+                        <view class="movie-summary">
+                            <text class="name">{{item.title}}</text>
+                            <block for="{{[item.rating]}}" for-item="item">
+                                <template is="rating-template" data="{{...item}}" />
+                            </block> 
+                            <text class="directors">导演：{{item.directors}}</text>
+                            <text class="casts">主演：{{item.casts}}</text>
+                            <text class="genres">类型：{{item.genres}}</text>
+                        </view>
+                    </view>
+                </view>
+            </block>
+        </scroll-view>
+    </view>
+</view>
+

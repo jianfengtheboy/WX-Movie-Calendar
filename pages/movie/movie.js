@@ -1,0 +1,252 @@
+// pages/movie/movie.js
+var app = getApp()
+Page({
+  data: {
+    showRating: false,
+    showWish: false,
+    acquiredSelected: false, 
+    inTheaters: {},  
+    comingSoon: {},  
+    top250: {},        
+    usBox: {}           
+  },
+  onLoad: function (options) {
+    // 页面初始化 options为页面跳转所带来的参数
+    var inTheatersURL = app.globalData.doubanBase + app.globalData.inTheaters + "?start=0&&count=10"
+    var comingSoonURL = app.globalData.doubanBase + app.globalData.comingSoon + "?start=0&&count=10"
+    // 豆瓣口碑榜，新片榜是高级接口
+    var top250URL = app.globalData.doubanBase + app.globalData.top250 + "?start=0&&count=12"
+    var usBoxUrl = app.globalData.doubanBase + app.globalData.usBox + "?start=0&&count=12"
+    this.getMovieListData(inTheatersURL, "inTheaters", "影院热映")
+    this.getMovieListData(comingSoonURL, "comingSoon", "即将上映")
+    this.getSelectedListData(top250URL,'top250')
+    this.getSelectedListData(usBoxUrl, 'usBox')
+  },
+  // 获取电影列表 
+  getMovieListData: function (url, settedKey, categoryTitle) {
+    var that = this
+    var todayDate = (new Date()).toLocaleDateString().replace(/\//g, '-')
+    wx.showToast({
+      title: '加载中',
+      icon: 'loading',
+      duration: 10000
+    })
+    wx.getStorage({
+      key: settedKey,
+      success: function (res) {
+        if (res.data.date === todayDate) {
+          that.processMovieListData(res.data.movieData, settedKey, categoryTitle)
+        } else {
+          that.loadMovie(url, settedKey, categoryTitle)
+        }
+      },
+      complete: function(){
+        wx.hideToast()
+      },
+      fail: function () {
+        that.loadMovie(url, settedKey, categoryTitle)
+      }
+    })
+  },
+  loadMovie: function (url, settedKey, categoryTitle){
+    var that = this
+    // 请求电影数据
+    wx.request({
+      url: url,
+      data: {},
+      method: 'GET', 
+      header: { "content-type": "json" }, 
+      success: function (res) {
+        var date = (new Date()).toLocaleDateString().replace(/\//g, '-')
+        var data = res.data
+        that.storeData(settedKey, date, data)
+        that.processMovieListData(data, settedKey, categoryTitle)
+      },
+      complete: function () {
+        wx.hideToast()
+      }
+    })
+  },
+  // 组装电影数据
+  processMovieListData: function (data, settedKey, categoryTitle) {
+    var movies = []
+    for (let idx in data.subjects) {
+      var subject = data.subjects[idx]
+      var showRating = false
+      var showWish = false
+      if ("inTheaters" == settedKey) {
+        showRating = true
+        showWish = false
+      } else {
+        showRating = true
+        showWish = false
+      }
+      //计算星星数
+      subject.rating.stars = this.starCount(subject.rating.stars)
+      var temp = {
+        id: subject.id,
+        title: subject.title,
+        rating: subject.rating,
+        collect_count: subject.collect_count,
+        images: subject.images,
+        subtype: subject.subtype,
+        directors: subject.directors,
+        casts: subject.casts,
+        year: subject.year,
+        showRating: showRating,
+        showWish: showWish
+      }
+      movies.push(temp)
+    }
+    var readyData = {}
+    readyData[settedKey] = {
+      categoryTitle: categoryTitle,
+      movies: movies
+    }
+    this.setData(readyData)
+  },
+  // 获取电影榜单数据 
+  getSelectedListData: function (url, settedKey) {
+    var that = this
+    var todayDate = (new Date()).toLocaleDateString().replace(/\//g, '-')
+    wx.showToast({
+      title: '加载中',
+      icon: 'loading',
+      duration: 10000
+    })
+    wx.getStorage({
+      key: settedKey,
+      success: function (res) {
+        if (res.data.date === todayDate) {
+          that.processSelectedListData(res.data.movieData, settedKey)
+        } else {
+          that.loadMovieBottom(url, settedKey)
+        }
+      },
+      fail: function () {
+        that.loadMovieBottom(url, settedKey)
+      },
+      complete: function () {
+        wx.hideToast()
+      }
+    })
+  },
+  loadMovieBottom: function (url, settedKey){
+    var that = this
+    wx.request({
+      url: url,
+      method: 'GET', 
+      header: { 'content-type': "json" }, 
+      success: function (res) {
+        var data = res.data
+        var date = (new Date()).toLocaleDateString().replace(/\//g, '-')
+        that.storeData(settedKey, date, data)
+        that.processSelectedListData(data, settedKey)
+      },
+      complete: function () {
+        wx.hideToast()
+      }
+    })
+  },
+  // 组装榜单数据 
+  processSelectedListData: function (data,type) {
+    var resArr = []
+    for (let idx = 0;idx <3;idx++) {
+      var subject = data.subjects[idx]
+      if(type === 'usBox'){
+          subject = data.subjects[idx].subject
+      }
+      var temp = {
+        id: subject.id,
+        title: subject.title,
+        rating: subject.rating,
+        collectCount: subject.collect_count,
+        images: subject.images,
+        subtype: subject.subtype,
+        directors: subject.directors,
+        casts: subject.casts,
+        year: subject.year
+      }
+      resArr.push(temp)
+    }
+    var date = new Date()
+    var year = date.getFullYear()
+    var month = date.getMonth()
+    var dayOfDate = date.getDate()
+    var date2 = new Date(year, month, dayOfDate + 7)
+    var year2 = date2.getFullYear()
+    var month2 = date2.getMonth()
+    var dayOfDate2 = date2.getDate()
+    var dateString = (month + 1) + "月" + dayOfDate + "日" + "-" + month2 + "月" + dayOfDate2 + "日"
+    var readyData = {}
+      readyData[type] = {
+          categoryType: type,
+          categoryTitle: "",
+          desc: "",
+          movies: resArr
+      }
+    if(type === 'top250'){
+      readyData[type].categoryTitle = "豆瓣Top250"
+      readyData[type].desc = "8分以上好电影"
+    }else if(type === 'usBox') {
+      readyData[type].categoryTitle = "北美票房榜"
+      readyData[type].desc = dateString
+    }
+    this.setData(readyData)
+  },
+  // 搜索电影
+  bindSearchNavigate: function (event) {
+    wx.navigateTo({
+      url: '/pages/movie/search/search'
+    })
+  },
+  // 显示更多电影列表 
+  bindMore: function (event) {
+    var typeId = event.currentTarget.dataset.typeId
+    wx.navigateTo({
+      url: '/pages/movie/movie-more/movie-more?typeId=' + typeId
+    })
+  },
+  // 跳转到榜单列表 
+  bindSelected: function (event) {
+    var typeId = event.currentTarget.dataset.typeId
+    var typeTitle = event.currentTarget.dataset.typeTitle
+    wx.navigateTo({
+      url: '/pages/movie/selected/selected?typeId=' + typeId + "&&typeTitle=" + typeTitle
+    })
+  },
+  // 跳转电影详情页 
+  bindMovieDetail: function (event) {
+    var id = event.currentTarget.dataset.id
+    wx.navigateTo({
+      url: '/pages/movie/movie-detail/movie-detail?id=' + id
+    })
+  },
+  //计算行星显示规则
+  starCount: function (originStars) {
+    //计算星星显示需要的数据，用数组stars存储五个值，分别对应每个位置的星星是全星、半星还是空星
+    var starNum = originStars / 10, stars = [], i = 0
+    do {
+      if (starNum >= 1) {
+        stars[i] = 'full'
+      } else if (starNum >= 0.5) {
+        stars[i] = 'half'
+      } else {
+        stars[i] = 'no'
+      }
+      starNum--
+      i++
+    } while (i < 5)
+    return stars
+  },
+  //将数据进行本地存储
+  storeData: function (key,date, movieData) {
+    wx.setStorage({
+      key: key,
+      data: {
+        date: date,
+        movieData: movieData
+      }
+    })
+  }
+})
